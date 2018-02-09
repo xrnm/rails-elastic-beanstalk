@@ -3,3 +3,8 @@
 %h2 Database field
 %p
   = Payload&.first&.text
+%p
+  This message from application.yml with Figaro:
+  %br
+  %strong
+    = ENV['SUPER_SECRET']
