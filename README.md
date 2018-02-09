@@ -13,31 +13,20 @@ modified to use Redis or another solution.
 
 `git clone https://github.com/xrnm/rails-elastic-beanstalk.git`
 
-#### 2. Update `.elasticbeanstalk/config.yml`
-Update `.elasticbeanstalk/config.yml` with your application, region, cli profile, and other data
-Here is an example of a working configuration. Obviously your file will contain different information 
+#### 2 Initialize The Application
 
-```
-branch-defaults:
-  master:
-    environment: rails-eb-dev
-    group_suffix: null
-global:
-  application_name: rails-beanstalk
-  branch: null
-  default_ec2_keyname: rails-elastic-beanstalk
-  default_platform: Ruby 2.3 (Puma)
-  default_region: us-west-2
-  include_git_submodules: true
-  instance_profile: null
-  platform_name: null
-  platform_version: null
-  profile: eb-cli
-  repository: null
-  sc: git
-  workspace_type: Application
+From the app directory run `eb init`
 
-```
+There is a guided setup process
+
+1. Select a region
+2. Create an application
+3. Select Ruby 2.3 (Puma)
+4. Yes/No to Code Commit
+5. Setup ssh if you would like
+
+This will create a file `.elasticbeanstalk/config.yml`
+
 
 #### 3. Update `.ebextensions/01_files.config`
 This configuration file executes during deployment and pulls important files from S3 so
@@ -56,12 +45,12 @@ use. This role is `aws-elasticbeanstalk-ec2-role` by default.
 #### 4. AWS Configurations
 In order to deploy you will need to setup a few things in AWS
 
-1. Create an RDS server and a database.yml file with the connection information. 
+1. Create an RDS instance and a database.yml file with the connection information. 
 2. Create an S3 bucket and upload the 5 files referenced above. Be sure the bucket name
 and file names match the changes you made to `.ebextensions/01_files.config`
 3. Permit EC2 instances to read the new bucket. In order to do this configure the IAM
 role associated with your elastic beanstalk EC2 instances (`aws-elasticbeanstalk-ec2-role` by default)
-with the following security policy.
+with the following security policy. Be sure to replace `<bucket>` with your S3 bucket's name
 ```
 {
     "Version": "2012-10-17",
@@ -81,7 +70,9 @@ with the following security policy.
     ]
 }
 ```
+
 Finally, ensure your RDS instance is configured to accept connections from the instances
+and that you setup your DNS properly
 
 #### 4. Deploy
 

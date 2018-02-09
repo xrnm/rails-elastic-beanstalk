@@ -31,3 +31,5 @@ config/secrets.yml
 
 
 public/assets
+
+.elasticbeanstalk
