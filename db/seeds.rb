@@ -1,0 +1,1 @@
+Payload.create(text: "This paylaod is being delivered from the PostgreSQL database")
