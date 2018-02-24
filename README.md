@@ -22,35 +22,24 @@ There is a guided setup process
 1. Select a region
 2. Create an application
 3. Select Ruby 2.3 (Puma)
-4. Yes/No to Code Commit
-5. Setup ssh if you would like
+4. Choose to use code commit or not
+5. Setup SSH if you would like
 
 This will create a file `.elasticbeanstalk/config.yml`
 
-
-#### 3. Update `.ebextensions/01_files.config`
-This configuration file executes during deployment and pulls important files from S3 so
-sensitive data does not have to be stored in the repository. The 5 files that are stored
-in S3 for this starter application are:
-
-1. SSL Key
-2. SSL Certificate
-3. application.yml - May contain API keypairs or other sensitive data.
-4. database.yml - Will contain access credentials to RDS
-5. secrets.yml - Contains a secret used by Rails for Cookie verification
-
-You will need to configure your bucket name, region, and the role your elasticbeanstalk ec2 instances
-use. This role is `aws-elasticbeanstalk-ec2-role` by default.
-
-#### 4. AWS Configurations
+#### 3. AWS Configurations
 In order to deploy you will need to setup a few things in AWS
 
-1. Create an RDS instance and a database.yml file with the connection information. 
-2. Create an S3 bucket and upload the 5 files referenced above. Be sure the bucket name
-and file names match the changes you made to `.ebextensions/01_files.config`
-3. Permit EC2 instances to read the new bucket. In order to do this configure the IAM
-role associated with your elastic beanstalk EC2 instances (`aws-elasticbeanstalk-ec2-role` by default)
-with the following security policy. Be sure to replace `<bucket>` with your S3 bucket's name
+1. Create or select an RDS instance to use
+2. Create an S3 bucket to hold your configuration files.
+3. Create an IAM role for your environment. This is an EC2 role which should have 
+  the `AWSElasticBeanstalkWebTier`, `AWSElasticBeanstalkMulticontainerDocker`, and `AWSElasticBeanstalkWorkerTier` policies
+4. Add a policy to your new IAM role to read the bucket you just created.
+You can use the AWS UI or the below JSON policy. If using the policy JSON Be sure to replace `<bucket>` with your S3 bucket's name
+5. Ensure your RDS instance is accessible
+6. (Optional) Add a DNS rule to give your site a nice domain name
+
+Policy JSON:
 ```
 {
     "Version": "2012-10-17",
@@ -59,32 +48,56 @@ with the following security policy. Be sure to replace `<bucket>` with your S3 b
             "Sid": "VisualEditor0",
             "Effect": "Allow",
             "Action": "s3:Get*",
-            "Resource": "arn:aws:s3:::<bucket>/*"
+            "Resource": [
+                "arn:aws:s3:::*/*",
+                "arn:aws:s3:::<bucket>"
+            ]
         },
         {
             "Sid": "VisualEditor1",
             "Effect": "Allow",
             "Action": "s3:List*",
-            "Resource": "arn:aws:s3:::<bucket>/*"
+            "Resource": [
+                "arn:aws:s3:::*/*",
+                "arn:aws:s3:::<bucket>"
+            ]
         }
     ]
 }
 ```
 
-Finally, ensure your RDS instance is configured to accept connections from the instances
-and that you setup your DNS properly
+#### 4. Create and Upload configuration files
+1. Create a database.yml file that contains the endpoint and credentials for your new or existing RDS instance
+2. Create your application.yml file to hold any environment variables of interest. `rails-elastic-beanstalk` comes with `figaro` installed
+3. Create a secrets.yml file. Use may use `rake secret` to generate a new token
+4. Find or create your SSL key and certificate for your desired domain
+5. Upload all of these files to your new S3 bucket
 
-#### 4. Deploy
+#### 5. Update `.ebextensions/01_files.config`
+This configuration file executes during deployment and pulls important files from S3 so
+sensitive data does not have to be stored in the repository. The 5 files that are stored
+in S3 for this starter application are:
+
+1. SSL Key
+2. SSL Certificate
+3. application.yml - May contain API keypairs or other sensitive data.
+4. database.yml - Will contain access credentials to RDS
+5. secrets.yml - Contains a secret used by Rails for cookie verification
+
+In `.ebextensions/01_files.config` overwrite the placeholders with your bucket name, region, and the role you created in step 3 
+
+#### 6. Deploy
 
 Once all of that is completed, from the application root directory commit all of your changes
-and execute the command `eb create <environment>` where <environment> is of the same name
-as in step 2.
+and execute the command `eb create <environment>` You can pick any environment name that serves your purposes
 
 Once the deployment completes do
 
 `eb open`
 
-#### 5. Success
+#### 7. Success
+
+## Limitations and Considerations
 
 
 ## MIT License
