@@ -1,8 +1,10 @@
 # Rails Elastic Beanstalk Starter App
 
 This starter application and attached guide is perfect for launching a Ruby on Rails application
-into elastic beanstalk and configuring it utilize an RDS PostgreSQL instance, S3 for secure
-token/password storage, and configuring top to bottom SSL.
+into elastic beanstalk and configuring it to utilize an RDS PostgreSQL instance, S3 for secure
+token/password storage, and configuring top to bottom SSL. This example also uses rails 5.1 and includes `yarn` in the 
+deployment. This means that webpack can be used to create Angular, React, Vue, or other modern Javascript
+front-ends.
 
 This example has been created using ActiveRecord as a session store, but could trivially be
 modified to use Redis or another solution.
@@ -37,7 +39,7 @@ In order to deploy you will need to setup a few things in AWS
 4. Add a policy to your new IAM role to read the bucket you just created.
 You can use the AWS UI or the below JSON policy. If using the policy JSON Be sure to replace `<bucket>` with your S3 bucket's name
 5. Ensure your RDS instance is accessible
-6. (Optional) Add a DNS rule to give your site a nice domain name
+
 
 Policy JSON:
 ```
@@ -89,7 +91,8 @@ In `.ebextensions/01_files.config` overwrite the placeholders with your bucket n
 #### 6. Deploy
 
 Once all of that is completed, from the application root directory commit all of your changes
-and execute the command `eb create <environment>` You can pick any environment name that serves your purposes
+and execute the command `eb create <environment> -ip <role>` You can pick any environment name that serves your purposes
+but `<role>` must be the IAM role you created in step #2 
 
 Once the deployment completes do
 
@@ -97,8 +100,7 @@ Once the deployment completes do
 
 #### 7. Success
 
-## Limitations and Considerations
-
+Optionally, add a DNS rule to give your site a nice domain name
 
 ## MIT License
 
